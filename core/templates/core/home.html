@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load markdown_extras wagtailcore_tags wagtailimages_tags %}
+{% block content %}
+  <section class="grid items-start gap-8 md:grid-cols-[1fr_auto]">
+    <div>
+      <p class="text-primary text-sm font-semibold tracking-wide uppercase">{{ page.location }}</p>
+      <h1 class="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl">{{ page.name }}</h1>
+      <p class="text-base-content/80 mt-3 text-xl">{{ page.headline }}</p>
+      <div class="post-body mt-6 max-w-2xl">{{ page.summary|markdownify }}</div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        {% if page.show_email and page.email %}<a class="btn btn-primary" href="mailto:{{ page.email }}">Email me</a>{% endif %}
+        {% if page.linkedin_url %}<a class="btn btn-outline" href="{{ page.linkedin_url }}" rel="me noopener">LinkedIn</a>{% endif %}
+        {% if page.github_url %}<a class="btn btn-outline" href="{{ page.github_url }}" rel="me noopener">GitHub</a>{% endif %}
+        {% if page.resume_pdf %}<a class="btn btn-ghost" href="{{ page.resume_pdf.url }}">Download resume (PDF)</a>{% endif %}
+        {% if page.show_phone and page.phone %}<span class="btn btn-ghost no-animation">{{ page.phone }}</span>{% endif %}
+      </div>
+    </div>
+    {% if page.photo %}
+      {% image page.photo fill-320x320 alt=page.name class="rounded-box ring-primary/20 h-40 w-40 object-cover ring-4" %}
+    {% endif %}
+  </section>
+
+  <div class="mt-16 grid gap-12 lg:grid-cols-[2fr_1fr]">
+    <section aria-labelledby="experience">
+      <h2 id="experience" class="border-primary/30 border-b-2 pb-2 text-2xl font-bold">Experience</h2>
+      <ol class="mt-6 space-y-8">
+        {% for exp in page.experiences.all %}
+          <li class="border-base-300 relative border-l-2 pl-6">
+            <span class="bg-primary absolute top-1.5 -left-[7px] h-3 w-3 rounded-full"></span>
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+              <h3 class="text-lg font-semibold">{{ exp.role }}</h3>
+              <p class="text-base-content/60 text-sm">{{ exp.start_date|date:"M Y" }} – {% if exp.end_date %}{{ exp.end_date|date:"M Y" }}{% else %}Present{% endif %}</p>
+            </div>
+            <p class="text-primary font-medium">{{ exp.company }}{% if exp.client %} <span class="text-base-content/60 font-normal">({{ exp.client }})</span>{% endif %}{% if exp.location %} <span class="text-base-content/50 font-normal">· {{ exp.location }}</span>{% endif %}</p>
+            {% if exp.summary %}<p class="text-base-content/80 mt-2">{{ exp.summary }}</p>{% endif %}
+            {% if exp.highlight_list %}
+              <ul class="text-base-content/80 mt-3 list-disc space-y-1 pl-5">
+                {% for h in exp.highlight_list %}<li>{{ h }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+
+    <aside class="space-y-10">
+      <section aria-labelledby="skills">
+        <h2 id="skills" class="border-primary/30 border-b-2 pb-2 text-2xl font-bold">Skills</h2>
+        <div class="mt-4 space-y-4">
+          {% for group in page.skill_groups.all %}
+            <div>
+              <h3 class="font-semibold">{{ group.name }}</h3>
+              <div class="mt-2 flex flex-wrap gap-2">
+                {% for s in group.skill_list %}<span class="badge badge-soft badge-primary">{{ s }}</span>{% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% with education=page.education.all %}{% if education %}
+        <section aria-labelledby="education">
+          <h2 id="education" class="border-primary/30 border-b-2 pb-2 text-2xl font-bold">Education</h2>
+          {% for ed in education %}
+            <div class="mt-4">
+              <h3 class="font-semibold">{{ ed.school }}</h3>
+              <p class="text-base-content/80">{{ ed.degree }}</p>
+              <p class="text-base-content/60 text-sm">{{ ed.location }}{% if ed.start_date %} · {{ ed.start_date|date:"M Y" }} – {{ ed.end_date|date:"M Y" }}{% endif %}</p>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}{% endwith %}
+
+      {% with certifications=page.certifications.all %}{% if certifications %}
+        <section aria-labelledby="certs">
+          <h2 id="certs" class="border-primary/30 border-b-2 pb-2 text-2xl font-bold">Certification</h2>
+          {% for c in certifications %}
+            <div class="mt-4">
+              <h3 class="font-semibold">{% if c.url %}<a class="link" href="{{ c.url }}">{{ c.name }}</a>{% else %}{{ c.name }}{% endif %}</h3>
+              <p class="text-base-content/60 text-sm">{{ c.issuer }}{% if c.period %} · {{ c.period }}{% endif %}</p>
+            </div>
+          {% endfor %}
+        </section>
+      {% endif %}{% endwith %}
+    </aside>
+  </div>
+
+  {% if latest_posts %}
+    <section class="mt-16" aria-labelledby="writing">
+      <div class="border-primary/30 flex items-baseline justify-between border-b-2 pb-2">
+        <h2 id="writing" class="text-2xl font-bold">Latest writing</h2>
+        {% if blog_index %}<a class="link link-primary" href="{% pageurl blog_index %}">All posts →</a>{% endif %}
+      </div>
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        {% for post in latest_posts %}{% include "blog/_card.html" %}{% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock content %}

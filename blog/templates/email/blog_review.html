@@ -1,0 +1,13 @@
+{% extends "email/base.html" %}
+
+{% block title %}AI draft ready for review{% endblock %}
+
+{% block content %}
+  <p>The daily automation found nothing in the publish queue, so it drafted a post with Claude:</p>
+  <p style="font-size:18px;font-weight:700;margin:16px 0 4px;">{{ post.title }}</p>
+  <p style="color:#4b5563;margin:0 0 24px;">{{ post.excerpt }}</p>
+  <p>
+    <a href="{{ admin_url }}" style="display:inline-block;background:#0f766e;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;font-weight:600;">Review in Wagtail</a>
+  </p>
+  <p style="color:#6b7280;font-size:14px;">In the <strong>Queue &amp; Facebook</strong> tab, set the daily queue to <strong>Queued</strong> to publish it (and share to Facebook) on the next daily run — or edit it, publish it now, or delete it.</p>
+{% endblock content %}

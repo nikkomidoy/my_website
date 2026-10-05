@@ -1,0 +1,11 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+<article class="card bg-base-100 border-base-300 hover:border-primary/50 border transition-colors">
+  {% if post.cover_image %}
+    <figure>{% image post.cover_image fill-800x320 alt="" class="h-40 w-full object-cover" loading="lazy" %}</figure>
+  {% endif %}
+  <div class="card-body">
+    <p class="text-base-content/60 text-sm"><time datetime="{{ post.first_published_at|date:'c' }}">{{ post.first_published_at|date:"M j, Y" }}</time></p>
+    <h3 class="card-title text-lg leading-snug"><a class="link link-hover" href="{% pageurl post %}">{{ post.title }}</a></h3>
+    <p class="text-base-content/80">{{ post.excerpt }}</p>
+  </div>
+</article>

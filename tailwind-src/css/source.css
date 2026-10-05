@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@source not "./tailwindcss";
+@source not "./daisyui{,*}.mjs";
+
+/* Template locations — Tailwind 4 only scans what @source lists. */
+@source "../../templates";
+@source "../../core/templates";
+@source "../../blog/templates";
+
+@plugin "./daisyui.mjs" {
+  themes: false;
+}
+
+/* Brand themes — teal from the resume header (#0f766e). */
+@plugin "./daisyui-theme.mjs" {
+  name: "nikko";
+  default: true;
+  color-scheme: light;
+  --color-base-100: oklch(99% 0.004 180);
+  --color-base-200: oklch(96.5% 0.008 180);
+  --color-base-300: oklch(92% 0.012 180);
+  --color-base-content: oklch(25% 0.02 230);
+  --color-primary: oklch(51% 0.09 185);
+  --color-primary-content: oklch(99% 0 0);
+  --color-secondary: oklch(45% 0.06 240);
+  --color-secondary-content: oklch(99% 0 0);
+  --color-accent: oklch(72% 0.13 75);
+  --color-accent-content: oklch(22% 0.03 75);
+  --color-neutral: oklch(28% 0.02 230);
+  --color-neutral-content: oklch(97% 0 0);
+  --color-info: oklch(62% 0.13 240);
+  --color-info-content: oklch(99% 0 0);
+  --color-success: oklch(62% 0.14 155);
+  --color-success-content: oklch(99% 0 0);
+  --color-warning: oklch(78% 0.15 80);
+  --color-warning-content: oklch(25% 0.04 80);
+  --color-error: oklch(58% 0.2 25);
+  --color-error-content: oklch(99% 0 0);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "./daisyui-theme.mjs" {
+  name: "nikko-dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(21% 0.015 220);
+  --color-base-200: oklch(18% 0.014 220);
+  --color-base-300: oklch(26% 0.016 220);
+  --color-base-content: oklch(92% 0.01 200);
+  --color-primary: oklch(72% 0.11 182);
+  --color-primary-content: oklch(18% 0.03 185);
+  --color-secondary: oklch(70% 0.07 240);
+  --color-secondary-content: oklch(18% 0.03 240);
+  --color-accent: oklch(78% 0.13 75);
+  --color-accent-content: oklch(22% 0.03 75);
+  --color-neutral: oklch(30% 0.02 220);
+  --color-neutral-content: oklch(92% 0.01 200);
+  --color-info: oklch(70% 0.12 240);
+  --color-info-content: oklch(18% 0.03 240);
+  --color-success: oklch(70% 0.14 155);
+  --color-success-content: oklch(18% 0.03 155);
+  --color-warning: oklch(80% 0.14 80);
+  --color-warning-content: oklch(22% 0.04 80);
+  --color-error: oklch(66% 0.19 25);
+  --color-error-content: oklch(18% 0.03 25);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Long-form blog body (Markdown → HTML) */
+@layer components {
+  .post-body { @apply text-base-content/90 leading-relaxed; }
+  .post-body h2 { @apply text-2xl font-bold mt-10 mb-3; }
+  .post-body h3 { @apply text-xl font-semibold mt-8 mb-2; }
+  .post-body p { @apply my-4; }
+  .post-body ul { @apply list-disc pl-6 my-4 space-y-1; }
+  .post-body ol { @apply list-decimal pl-6 my-4 space-y-1; }
+  .post-body a { @apply link link-primary; }
+  .post-body blockquote { @apply border-l-4 border-primary/40 pl-4 italic my-6 text-base-content/70; }
+  .post-body code { @apply bg-base-200 rounded px-1 py-0.5 text-sm; }
+  .post-body pre { @apply bg-neutral text-neutral-content rounded-box p-4 overflow-x-auto my-6 text-sm; }
+  .post-body pre code { @apply bg-transparent p-0; }
+  .post-body img { @apply rounded-box my-6; }
+}

@@ -1,0 +1,11 @@
+{% extends "allauth/layouts/base.html" %}
+
+{% block allauth_content %}
+  <div class="mx-auto max-w-md">
+    <div class="card border-base-300 bg-base-100 border shadow-sm">
+      <div class="card-body gap-4">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock allauth_content %}

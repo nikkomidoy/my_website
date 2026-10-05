@@ -1,0 +1,71 @@
+name: test
+
+on:
+  # push to main is covered by deploy.yml calling this workflow (workflow_call) —
+  # a `push:` trigger here would double-run every main commit.
+  pull_request:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      # 50+ chars, 5+ unique, no `django-insecure-` prefix — trips security.W009 otherwise.
+      DJANGO_SECRET_KEY: ci-placeholder-secret-key-not-a-real-secret-0123456789-abcxyz
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "*"
+      DJANGO_SITE_DOMAIN: example.com
+      # `DEBUG=False` triggers the gated `env.NOTSET` branch on every
+      # required env var. Provide safe placeholders so settings load:
+      DJANGO_MAIL_HOST: localhost
+      DEFAULT_FROM_EMAIL: test@example.com
+      SERVER_EMAIL: test@example.com
+      AWS_ACCESS_KEY_ID: ci-placeholder
+      AWS_SECRET_ACCESS_KEY: ci-placeholder
+      AWS_STORAGE_BUCKET_NAME: ci-placeholder
+      DBBACKUP_BUCKET: ci-placeholder
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - run: uv sync --frozen
+
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pyright
+
+      # Remaining hooks (whitespace, uv-lock, django-upgrade, djade, djhtml, rustywind);
+      # ruff/pyright already ran above.
+      - run: uv run pre-commit run --all-files --show-diff-on-failure
+        env:
+          SKIP: ruff-check,ruff-format,pyright
+
+      # Catches security-setting regressions (SSL_REDIRECT without proxy,
+      # missing HSTS, etc.) at CI time instead of first-deploy.
+      - run: uv run manage.py check --deploy --fail-level WARNING
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.production
+
+      # Fails when a model change landed without its migration.
+      - run: uv run manage.py makemigrations --check --dry-run
+
+      - run: uv run pytest --cov --cov-report=term

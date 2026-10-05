@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+  <article class="mx-auto max-w-3xl">
+    <h1 class="text-4xl font-extrabold tracking-tight">{{ page.title }}</h1>
+    <div class="post-body mt-8">{% for block in page.body %}{% include_block block %}{% endfor %}</div>
+  </article>
+{% endblock content %}

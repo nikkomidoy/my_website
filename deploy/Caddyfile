@@ -1,0 +1,19 @@
+# Domain comes from DJANGO_SITE_DOMAIN in deploy/.env.prod; Caddy issues the TLS cert.
+{$DJANGO_SITE_DOMAIN} {
+    encode zstd gzip          # Caddy doesn't compress by default
+    request_body {
+        max_size 10MB         # cover-image uploads through the admin
+    }
+    # Privacy: Caddy's access log is off by default; don't enable it with IPs.
+    reverse_proxy web:8000 {
+        # Probe /healthz (process up) — NOT /readyz (DB+deps).
+        health_uri /healthz
+        health_interval 10s
+        health_timeout 3s
+    }
+}
+
+# Redirect www → apex
+www.{$DJANGO_SITE_DOMAIN} {
+    redir https://{$DJANGO_SITE_DOMAIN}{uri} permanent
+}

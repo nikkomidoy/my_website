@@ -1,0 +1,43 @@
+{% load allauth %}
+{% if attrs.type == "checkbox" or attrs.type == "radio" %}
+  <label class="label cursor-pointer gap-3" for="{{ attrs.id }}">
+    <input class="{% if attrs.type == 'checkbox' %}checkbox checkbox-primary checkbox-sm{% else %}radio radio-primary radio-sm{% endif %}"
+           {% if attrs.required %}required{% endif %}
+           {% if attrs.disabled %}disabled{% endif %}
+           {% if attrs.checked %}checked{% endif %}
+           {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+           {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+           {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+           type="{{ attrs.type }}">
+    <span class="text-base-content">{% slot label %}{% endslot %}</span>
+  </label>
+{% else %}
+  <fieldset class="fieldset">
+    <label class="fieldset-legend pb-1" for="{{ attrs.id }}">{% slot label %}{% endslot %}</label>
+    {% if attrs.type == "textarea" %}
+      <textarea class="textarea w-full {% if attrs.errors %}textarea-error{% endif %}"
+                {% if attrs.required %}required{% endif %}
+                {% if attrs.rows %}rows="{{ attrs.rows }}"{% endif %}
+                {% if attrs.disabled %}disabled{% endif %}
+                {% if attrs.readonly %}readonly{% endif %}
+                {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+                {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+                {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}>{% slot value %}{% endslot %}</textarea>
+    {% else %}
+      <input class="input w-full {% if attrs.errors %}input-error{% endif %}"
+             {% if attrs.required %}required{% endif %}
+             {% if attrs.disabled %}disabled{% endif %}
+             {% if attrs.readonly %}readonly{% endif %}
+             {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+             {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+             {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+             {% if attrs.autocomplete %}autocomplete="{{ attrs.autocomplete }}"{% endif %}
+             {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+             type="{{ attrs.type }}">
+    {% endif %}
+    {% if slots.help_text %}
+      <p class="label whitespace-normal">{% slot help_text %}{% endslot %}</p>
+    {% endif %}
+    {% for error in attrs.errors %}<p class="text-error text-sm">{{ error }}</p>{% endfor %}
+  </fieldset>
+{% endif %}

@@ -1,0 +1,15 @@
+{% extends "wagtailadmin/base.html" %}
+
+{% block titletag %}{{ title }}{% endblock %}
+
+{% block content %}
+  {% include "wagtailadmin/shared/header.html" with title=title icon="edit" %}
+  <div class="nice-padding">
+    <p class="help-block">{{ message }}</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="button">{{ submit_label }}</button>
+      <a href="{{ cancel_url }}" class="button button-secondary">Cancel</a>
+    </form>
+  </div>
+{% endblock content %}

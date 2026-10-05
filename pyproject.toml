@@ -1,0 +1,118 @@
+[project]
+name = "nikkocomidoy"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.11.0",
+    "django>=6.1,<7.0",
+    "django-allauth[mfa]>=65.19.7",
+    "django-axes[ipware]>=8.3.1",
+    "django-crontask>=2.0.1",
+    "django-dbbackup>=5.3.1",
+    "django-environ>=0.14.0",
+    "django-modern-rest[msgspec,openapi]>=0.11,<1.0",
+    "django-storages[s3]>=1.14.6",
+    "django-structlog>=10.1.0",
+    "django-tailwind-cli>=4.8.1",
+    "gunicorn>=26.2.0",
+    "markdown>=3.11",
+    "nh3>=0.3.7",
+    "pillow>=12.3.0",
+    "psycopg[binary]>=3.3.6",
+    "pydantic>=2.13.5",
+    "pyjwt[crypto]>=2.15.1",
+    "requests>=2.34.2",
+    "sentry-sdk>=2.71.0",
+    "structlog>=26.1.0",
+    "wagtail>=8.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-browser-reload>=1.21.0",
+    "django-extensions>=4.1",
+    "django-silk>=5.6.0",
+    "django-stubs>=6.1.2",
+    "django-stubs-ext>=6.1.2",
+    "django-test-migrations>=1.7.0",
+    "django-zeal>=2.2.4",
+    "pre-commit>=4.6.2",
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.16.10",
+]
+
+[tool.ruff]
+# target-version auto-detected from `requires-python`
+line-length = 100
+extend-exclude = ["migrations", "*/migrations/*"]
+force-exclude = true  # honour excludes when pre-commit passes explicit filenames
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "DJ",       # flake8-django
+    "S",        # flake8-bandit
+    "SIM",      # flake8-simplify
+    "RUF",
+]
+ignore = [
+    "E501",     # line length — formatter handles it
+    "S101",     # assert — fine in tests
+    "RUF012",   # mutable class attrs — Django idiom (Meta.fields, REQUIRED_FIELDS, list_display, fieldsets, …)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**"      = ["S"]
+"**/test_*.py"     = ["S"]
+"**/tests.py"      = ["S"]                   # Django's default `startapp` stub
+"**/settings/*.py" = ["F405", "F403", "S105", "S106"]  # star imports + dev-only SECRET_KEY / password defaults
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "users", "core", "blog", "api"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    ".venv/**",
+    "**/migrations/**",
+    "**/tests/**",
+    "**/test_*.py",
+    "config/wsgi.py",
+    "config/asgi.py",
+    "manage.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.pyright]
+include = ["."]
+exclude = [
+    "**/migrations/**",
+    "**/__pycache__",
+    ".venv",
+    "staticfiles",
+    "media",
+    # django-environ's conditional default pattern (`default="x" if DEBUG else env.NOTSET`)
+    # produces false-positive reportArgumentType errors — pyright sees `str | NoValue`
+    # where `NoValue` is expected. Excluding settings avoids dozens of spurious errors.
+    "config/settings",
+]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.13"               # the concrete runtime pin — see references/conventions.md
+typeCheckingMode = "basic"           # "standard" once code is typed; "strict" is noisy on Django
+useLibraryCodeForTypes = true        # read source for packages without stubs (allauth, axes, …)
+reportMissingTypeStubs = "none"      # third-party stubs are optional
+strictListInference = true

@@ -1,0 +1,71 @@
+# The default json-file log driver grows without bound — cap it once here
+# and attach to every service, or the disk fills in a few months.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env.prod
+    logging: *logging
+    healthcheck:
+      # python+urllib instead of curl — slim has no curl. DJANGO_ALLOWED_HOSTS must
+      # include localhost (see deploy/.env.prod.example) or this probe 400s.
+      test: ["CMD-SHELL", "python -c 'import urllib.request,sys; sys.exit(0 if urllib.request.urlopen(\"http://localhost:8000/healthz\",timeout=2).status==200 else 1)'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Runs the daily blog → Facebook job, the nightly DB backup and GDPR purges.
+  cron:
+    image: ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file: .env.prod
+    command: python manage.py crontask
+    logging: *logging
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    logging: *logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DJANGO_SITE_DOMAIN: ${DJANGO_SITE_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    logging: *logging
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

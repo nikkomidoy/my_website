@@ -1,0 +1,8 @@
+{% extends "email/base.html" %}
+
+{% block title %}Test email{% endblock %}
+
+{% block content %}
+  <p>This is a test email from <strong>{{ site_domain }}</strong>.</p>
+  <p>If you can read this, the mailer is configured correctly.</p>
+{% endblock content %}

@@ -1,0 +1,56 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.23
+    hooks:
+      # Blocks the commit when uv.lock drifts from pyproject.toml; CI runs `uv sync --locked`.
+      - id: uv-lock
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.33.0
+    hooks:
+      # Rewrites deprecated Django APIs. Ruff's UP ruleset covers Python syntax, not Django's.
+      - id: django-upgrade
+
+  - repo: https://github.com/adamchainz/djade-pre-commit
+    rev: 1.9.0
+    hooks:
+      # Same, for template syntax: `{% load %}` removals, `{% if %}` operators.
+      - id: djade
+
+  - repo: https://github.com/rtts/djhtml
+    rev: 3.0.11
+    hooks:
+      - id: djhtml
+        entry: djhtml --tabwidth 2
+
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.414
+    hooks:
+      - id: pyright
+
+  - repo: local
+    hooks:
+      - id: rustywind
+        name: rustywind Tailwind class sorter
+        language: node
+        additional_dependencies: [rustywind@latest]
+        entry: rustywind
+        args: [--write]
+        types_or: [html]

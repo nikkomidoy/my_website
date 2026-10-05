@@ -1,0 +1,4 @@
+{% if ANALYTICS_ID and ANALYTICS_HOST and not DEBUG %}
+  <script data-goatcounter="{{ ANALYTICS_HOST }}/count"
+          async src="//gc.zgo.at/count.js"></script>
+{% endif %}

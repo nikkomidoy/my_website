@@ -1,0 +1,5 @@
+{% load wagtailimages_tags %}
+<figure>
+  {% image value.image width-1200 %}
+  {% if value.caption %}<figcaption class="text-base-content/60 -mt-3 text-center text-sm">{{ value.caption }}</figcaption>{% endif %}
+</figure>

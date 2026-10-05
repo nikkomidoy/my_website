@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+  <header class="max-w-3xl">
+    <h1 class="text-4xl font-extrabold tracking-tight">{{ page.title }}</h1>
+    {% if page.intro %}<p class="text-base-content/80 mt-3 text-lg">{{ page.intro }}</p>{% endif %}
+    {% if tag %}<p class="mt-4">Tagged <span class="badge badge-primary">{{ tag }}</span> · <a class="link" href="{% pageurl page %}">clear</a></p>{% endif %}
+  </header>
+
+  <div class="mt-10 grid gap-6 md:grid-cols-2">
+    {% for post in page_obj %}
+      {% include "blog/_card.html" %}
+    {% empty %}
+      <p class="text-base-content/70">No posts yet.</p>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="join mt-10" aria-label="Pagination">
+      {% if page_obj.has_previous %}<a class="join-item btn" href="?page={{ page_obj.previous_page_number }}{% if tag %}&tag={{ tag|urlencode }}{% endif %}">« Newer</a>{% endif %}
+      <span class="join-item btn btn-disabled">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}<a class="join-item btn" href="?page={{ page_obj.next_page_number }}{% if tag %}&tag={{ tag|urlencode }}{% endif %}">Older »</a>{% endif %}
+    </nav>
+  {% endif %}
+{% endblock content %}

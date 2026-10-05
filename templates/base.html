@@ -1,0 +1,65 @@
+{% load site_tags static tailwind_cli wagtailcore_tags wagtailroutablepage_tags %}
+<!DOCTYPE html>
+<html lang="en" data-theme="nikko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% firstof meta_title page.seo_title page.title as page_title %}
+    {% firstof meta_description page.search_description "Senior Software Engineer — Python & Django. Resume and blog." as page_description %}
+    <title>{% block title %}{% if page_title %}{{ page_title }} · {% endif %}{{ site_home.name|default:"Nikko Comidoy" }}{% endblock %}</title>
+    {% block meta %}
+      <meta name="description" content="{{ page_description }}">
+      <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+      <meta property="og:type" content="website">
+      <meta property="og:site_name" content="{{ site_home.name|default:'Nikko Comidoy' }}">
+      <meta property="og:title" content="{{ page_title|default:site_home.name|default:'Nikko Comidoy' }}">
+      <meta property="og:description" content="{{ page_description }}">
+      <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+      <meta name="twitter:card" content="summary">
+    {% endblock meta %}
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon-32.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+    {% if blog_index %}<link rel="alternate" type="application/rss+xml" title="Blog" href="{% routablepageurl blog_index 'feed' %}">{% endif %}
+    {% tailwind_css %}
+  </head>
+  <body class="bg-base-100 text-base-content flex min-h-screen flex-col">
+    <header class="border-base-300 bg-base-100/90 sticky top-0 z-20 border-b backdrop-blur">
+      <nav class="navbar mx-auto max-w-5xl px-4">
+        <div class="flex-1">
+          <a href="{% if site_home %}{% pageurl site_home %}{% else %}/{% endif %}" class="flex items-center gap-2 text-lg font-bold">
+            <img src="{% static 'favicon.svg' %}" alt="" class="h-8 w-8">
+            <span class="hidden sm:inline">{{ site_home.name|default:"Nikko Comidoy" }}</span>
+          </a>
+        </div>
+        <ul class="menu menu-horizontal items-center gap-1 px-0">
+          {% if site_home %}<li><a href="{% pageurl site_home %}" class="{% if page.pk == site_home.pk %}menu-active{% endif %}">Resume</a></li>{% endif %}
+          {% for p in nav_pages %}<li><a href="{% pageurl p %}" class="{% if page|in_section:p %}menu-active{% endif %}">{{ p.title }}</a></li>{% endfor %}
+          <li>
+            <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm" aria-label="Toggle dark mode">
+              <input type="checkbox" class="theme-controller" value="nikko-dark">
+              <svg class="swap-off h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64 17l-.71.71a1 1 0 001.41 1.41l.71-.71A1 1 0 005.64 17zM5 12a1 1 0 00-1-1H3a1 1 0 000 2h1a1 1 0 001-1zm7-7a1 1 0 001-1V3a1 1 0 00-2 0v1a1 1 0 001 1zM5.64 7.05a1 1 0 00.7.29 1 1 0 00.71-.29 1 1 0 000-1.41l-.71-.71a1 1 0 00-1.41 1.41zm12 .29a1 1 0 00.7-.29l.71-.71a1 1 0 10-1.41-1.41l-.64.71a1 1 0 000 1.41 1 1 0 00.66.29zM21 11h-1a1 1 0 000 2h1a1 1 0 000-2zm-9 8a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm6.36-2A1 1 0 0017 18.36l.71.71a1 1 0 001.41 0 1 1 0 000-1.41zM12 6.5a5.5 5.5 0 105.5 5.5A5.51 5.51 0 0012 6.5zm0 9a3.5 3.5 0 113.5-3.5 3.5 3.5 0 01-3.5 3.5z"/></svg>
+              <svg class="swap-on h-5 w-5 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64 13a1 1 0 00-1.05-.14 8.05 8.05 0 01-3.37.73 8.15 8.15 0 01-8.14-8.1 8.59 8.59 0 01.25-2A1 1 0 008 2.36a10.14 10.14 0 1014 11.69 1 1 0 00-.36-1.05zm-9.5 6.69A8.14 8.14 0 017.08 5.22v.27a10.15 10.15 0 0010.14 10.14 9.79 9.79 0 002.1-.22 8.11 8.11 0 01-7.18 4.32z"/></svg>
+            </label>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
+      {% block main %}{% block content %}{% endblock %}{% endblock %}
+    </main>
+
+    <footer class="border-base-300 bg-base-200 border-t">
+      <div class="text-base-content/70 mx-auto flex max-w-5xl flex-col justify-between gap-3 px-4 py-6 text-sm sm:flex-row">
+        <p>&copy; {% now "Y" %} {{ site_home.name|default:"Nikko Comidoy" }}. No tracking cookies.</p>
+        <nav class="flex gap-4">
+          {% if blog_index %}<a class="link link-hover" href="{% routablepageurl blog_index 'feed' %}">RSS</a>{% endif %}
+          {% for p in footer_pages %}<a class="link link-hover" href="{% pageurl p %}">{{ p.title }}</a>{% endfor %}
+          {% if site_home.linkedin_url %}<a class="link link-hover" href="{{ site_home.linkedin_url }}" rel="me noopener">LinkedIn</a>{% endif %}
+        </nav>
+      </div>
+    </footer>
+    {% include "_analytics.html" %}
+  </body>
+</html>

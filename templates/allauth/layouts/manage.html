@@ -1,0 +1,25 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block allauth_content %}
+  <div class="grid gap-8 md:grid-cols-[14rem_1fr]">
+    <aside>
+      <ul class="menu rounded-box bg-base-200 w-full">
+        <li class="menu-title">{% trans "Account" %}</li>
+        {% url 'account_email' as email_url_ %}
+        {% if email_url_ %}<li><a href="{{ email_url_ }}" class="{% if request.path == email_url_ %}menu-active{% endif %}">{% trans "Email" %}</a></li>{% endif %}
+        {% url 'account_change_password' as change_password_url_ %}
+        {% if change_password_url_ %}<li><a href="{{ change_password_url_ }}" class="{% if request.path == change_password_url_ %}menu-active{% endif %}">{% trans "Password" %}</a></li>{% endif %}
+        {% url 'mfa_index' as mfa_url_ %}
+        {% if mfa_url_ %}<li><a href="{{ mfa_url_ }}" class="{% if mfa_url_ in request.path %}menu-active{% endif %}">{% trans "Two-factor authentication" %}</a></li>{% endif %}
+        {% url 'usersessions_list' as usersessions_list_url_ %}
+        {% if usersessions_list_url_ %}<li><a href="{{ usersessions_list_url_ }}">{% trans "Sessions" %}</a></li>{% endif %}
+        {% if user.is_staff %}<li><a href="/admin/">{% trans "CMS admin" %}</a></li>{% endif %}
+        {% url 'account_logout' as logout_url_ %}
+        {% if logout_url_ %}<li><a href="{{ logout_url_ }}">{% trans "Sign out" %}</a></li>{% endif %}
+      </ul>
+    </aside>
+    <div class="min-w-0 space-y-6">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+{% endblock allauth_content %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% comment %}
+  Site-styled shell for every allauth page (login, signup, 2FA, account management).
+  Allauth pages fill `content`; the site's `content` block lives inside `main`, which is
+  replaced here so the wrappers below stay intact.
+{% endcomment %}
+{% block title %}{% block head_title %}{% endblock %} · {{ site_home.name|default:"Nikko Comidoy" }}{% endblock %}
+
+{% block meta %}
+  <meta name="robots" content="noindex, nofollow">
+  {% block extra_head %}{% endblock %}
+{% endblock meta %}
+
+{% block main %}
+  {% if messages %}
+    <div class="mx-auto mb-6 max-w-md space-y-2">
+      {% for message in messages %}
+        <div role="alert" class="alert alert-soft {% if message.level_tag == 'error' %}alert-error{% elif message.level_tag == 'warning' %}alert-warning{% elif message.level_tag == 'success' %}alert-success{% else %}alert-info{% endif %}">
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block body %}{% block allauth_content %}{% block content %}{% endblock %}{% endblock %}{% endblock %}
+  {% block extra_body %}{% endblock %}
+{% endblock main %}
