@@ -227,7 +227,8 @@ AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="" if DEBUG els
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
 # Non-AWS providers (MinIO, R2, B2, Spaces): set the endpoint, skip
 # AWS_S3_CUSTOM_DOMAIN so django-storages signs URLs against the endpoint.
-AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="")
+# None, not "": boto3 rejects an empty endpoint_url ("Invalid endpoint").
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="") or None
 AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default="")
 
 # Media to S3 when a bucket is configured; fall back to local FileSystemStorage
