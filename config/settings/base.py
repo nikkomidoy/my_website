@@ -230,6 +230,11 @@ AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
 # None, not "": boto3 rejects an empty endpoint_url ("Invalid endpoint").
 AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="") or None
 AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default="")
+if AWS_STORAGE_BUCKET_NAME and not AWS_S3_CUSTOM_DOMAIN and not AWS_S3_ENDPOINT_URL:
+    # Pin file URLs to the regional bucket host. Left unset, django-storages builds
+    # URLs on the global `<bucket>.s3.amazonaws.com` host, which then doesn't match
+    # the CSP allowlist built from STATIC_URL / MEDIA_URL and browsers block the CSS.
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 
 # Media to S3 when a bucket is configured; fall back to local FileSystemStorage
 # when AWS_STORAGE_BUCKET_NAME is empty so a fresh `runserver` boots without creds.
