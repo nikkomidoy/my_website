@@ -18,7 +18,8 @@ if AWS_STORAGE_BUCKET_NAME:
         **STORAGES,
         "staticfiles": {
             "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
-            "OPTIONS": {"location": "static"},
+            # collectstatic must replace changed CSS/JS in place, not add suffixed copies.
+            "OPTIONS": {"location": "static", "file_overwrite": True},
         },
     }
 
@@ -151,8 +152,9 @@ if not DEBUG:
         "dbbackup": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
             "OPTIONS": {
-                "access_key": env("AWS_ACCESS_KEY_ID"),
-                "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+                # None → instance role (see base.py)
+                "access_key": AWS_ACCESS_KEY_ID,
+                "secret_key": AWS_SECRET_ACCESS_KEY,
                 "bucket_name": env("DBBACKUP_BUCKET"),  # SEPARATE bucket from media
                 "region_name": AWS_S3_REGION_NAME,
                 "default_acl": "private",

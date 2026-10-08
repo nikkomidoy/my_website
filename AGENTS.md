@@ -18,7 +18,7 @@ Personal Wagtail CMS (resume + blog) for Nikko Comidoy, with a daily blog → Fa
 - Task runner: Make.
 - Auth: django-allauth (login by email or username), allauth.mfa (TOTP + recovery codes), django-axes (AxesBackend first, AxesMiddleware last).
 - Cache: locmem.
-- Storage: django-storages S3 for media (base, when bucket set) and static (production); public URLs (`AWS_QUERYSTRING_AUTH=False`).
+- Storage: django-storages S3 for media (base, when bucket set) and static (production); public URLs (`AWS_QUERYSTRING_AUTH=False`); media never overwritten (`AWS_S3_FILE_OVERWRITE=False`). Prod uses the EC2 instance role — AWS keys stay unset (`None`, never "").
 - Background: `django.tasks` (default immediate backend) + django-crontask; scheduler process `manage.py crontask`.
 - Email: `MAILERS` — console in dev, SMTP (SES) in prod; `core/templates/email/base.html`; `send_test_email`.
 - Frontend: django-tailwind-cli (Tailwind 4) + vendored DaisyUI 5 (`tailwind-src/css/`), custom `nikko` / `nikko-dark` themes; favicon in `assets/`.

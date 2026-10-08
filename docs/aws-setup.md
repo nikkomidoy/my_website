@@ -6,7 +6,7 @@ Rough cost: t4g.small (~US$12/mo) + S3/SES pennies.
 
 ## 1. S3 buckets
 
-Create two buckets in your region (e.g. `ca-central-1`):
+Create two buckets in your account's region (this account: `us-east-2`, Ohio):
 
 | Bucket | Purpose | Public? |
 |---|---|---|
@@ -40,10 +40,17 @@ CORS on the assets bucket (fonts/CSS loaded cross-origin):
 
 Optional: put CloudFront in front and set `AWS_S3_CUSTOM_DOMAIN`.
 
-## 2. IAM user for the app (least privilege)
+## 2. IAM role for the server (no access keys)
 
-Create user `nikkocomidoy-app`, attach this inline policy, create an access key and put it in
-`deploy/.env.prod` (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`):
+The app gets S3 access from an **instance role** attached to the EC2 server: AWS hands the
+server short-lived credentials automatically, so there are no long-lived keys to store or leak.
+Leave `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` **empty** in `deploy/.env.prod`.
+
+1. IAM → **Roles** → **Create role** → *Trusted entity type*: **AWS service** →
+   *Use case*: **EC2** → Next → skip *Add permissions* → Next.
+2. Role name `nikkocomidoy-ec2` → **Create role**.
+3. Open the role → **Add permissions** → **Create inline policy** → **JSON** → paste (change the
+   bucket names if yours differ) → name it `s3-access` → **Create policy**:
 
 ```json
 {
@@ -57,16 +64,39 @@ Create user `nikkocomidoy-app`, attach this inline policy, create an access key 
 }
 ```
 
-## 3. SES (email)
+You attach this role to the server when you launch it (section 4).
 
-Verify your domain in SES, request production access (out of the sandbox), then create
-**SMTP credentials** → `DJANGO_MAIL_USERNAME` / `DJANGO_MAIL_PASSWORD`;
-host `email-smtp.<region>.amazonaws.com`.
+## 3. Email (Gmail SMTP)
+
+This account can't create IAM users, which Amazon SES SMTP credentials require, so the site
+sends through Gmail. That covers a personal site's volume (password resets, the daily
+AI-draft review email) without a domain or SES approval.
+
+1. Turn on **2-Step Verification** for the Google account: <https://myaccount.google.com/security>.
+2. Create an **app password**: <https://myaccount.google.com/apppasswords> → name it
+   `nikkocomidoy` → copy the 16-character password (shown once).
+3. In `deploy/.env.prod`: `DJANGO_MAIL_PASSWORD=<app password>`; the other Gmail values are
+   pre-filled in `deploy/.env.prod.example`.
+4. After deploying, test it on the server:
+   `docker compose --env-file deploy/.env.prod -f deploy/docker-compose.prod.yml exec web python manage.py send_test_email nikkomidoy@gmail.com`
+
+Later, to send from your own domain: switch to Amazon SES through the instance role
+(django-anymail's SES backend), which needs no SMTP user.
 
 ## 4. EC2
 
 1. Launch **Ubuntu 24.04 LTS**, `t4g.small` (arm64; the image is built for arm64 + amd64), 20 GB gp3.
-2. Security group: inbound 22 (your IP only), 80, 443.
+   Under **Advanced details**:
+   - **IAM instance profile**: `nikkocomidoy-ec2` (the role from section 2).
+   - **Metadata version**: *V2 only (token required)*.
+   - **Metadata response hop limit**: **2**. The app runs inside Docker containers, which are one
+     network hop further from the server; with the default of 1 they can't fetch the role's
+     credentials and every S3 upload fails with "Unable to locate credentials".
+   Forgot? EC2 → the instance → **Actions → Security → Modify IAM role**, and
+   **Actions → Instance settings → Modify instance metadata options** (hop limit 2).
+2. Security group: inbound 22, 80, 443 from anywhere. Port 22 must stay open to
+   `0.0.0.0/0` because GitHub Actions deploys over SSH from changing IP addresses; it is
+   key-only (Ubuntu disables password login), so keep your private keys safe.
 3. Allocate an **Elastic IP** and point DNS `A` records for `YOUR_DOMAIN` and `www.YOUR_DOMAIN` at it.
 4. Install Docker and prepare the deploy directory:
 

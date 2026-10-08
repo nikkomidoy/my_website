@@ -218,8 +218,11 @@ USE_TZ = True
 # Storage — S3 (django-storages)
 # Gated defaults match the foundation pattern: dev/build runs zero-config,
 # prod (DEBUG unset) raises ImproperlyConfigured if any of these is missing.
-AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="" if DEBUG else env.NOTSET)
-AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="" if DEBUG else env.NOTSET)
+# Keys are optional: leave them unset on EC2 and boto3 uses the instance role
+# (temporary credentials from the instance metadata service). `None`, not "" —
+# an empty string makes boto3 sign requests with blank credentials.
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="") or None
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="") or None
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="" if DEBUG else env.NOTSET)
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
 # Non-AWS providers (MinIO, R2, B2, Spaces): set the endpoint, skip
@@ -261,6 +264,9 @@ TAILWIND_CLI_SRC_CSS = "tailwind-src/css/source.css"  # custom source — outsid
 
 # Browsers re-download every media object on every view without this.
 AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+# Never overwrite an upload that shares a name (Wagtail check wagtailadmin.W004);
+# storages appends a suffix instead. Static files opt back in (production.py).
+AWS_S3_FILE_OVERWRITE = False
 # Public media URLs (bucket policy grants read on media/*): signed URLs expire, which
 # breaks cached pages and Facebook link-preview images.
 AWS_QUERYSTRING_AUTH = False

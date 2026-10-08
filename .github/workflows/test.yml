@@ -35,15 +35,13 @@ jobs:
       DJANGO_MAIL_HOST: localhost
       DEFAULT_FROM_EMAIL: test@example.com
       SERVER_EMAIL: test@example.com
-      AWS_ACCESS_KEY_ID: ci-placeholder
-      AWS_SECRET_ACCESS_KEY: ci-placeholder
       AWS_STORAGE_BUCKET_NAME: ci-placeholder
       DBBACKUP_BUCKET: ci-placeholder
 
     steps:
       - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0  # upstream publishes no floating v10 tag
         with:
           enable-cache: true
 
